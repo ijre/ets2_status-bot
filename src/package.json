@@ -1,0 +1,27 @@
+{
+  "name": "ets2_status-bot",
+  "version": "0.0.1",
+  "description": "A bot that tells people your current status/stats in ETS2",
+  "main": "main.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ijre/ets2_status-bot.git"
+  },
+  "keywords": [
+    "ijre",
+    "robot",
+    "bot",
+    "discord",
+    "discord-bot",
+    "discord-robot"
+  ],
+  "author": "ijre",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ijre/ets2_status-bot/issues"
+  },
+  "homepage": "https://github.com/ijre/ets2_status-bot#readme",
+  "dependencies": {
+    "discord.js": "^11.5.1"
+  }
+}
