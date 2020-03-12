@@ -6,12 +6,17 @@ using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using System.Text;
+using System.IO;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Funbit.Ets.Telemetry.Server.Controllers;
 using Funbit.Ets.Telemetry.Server.Data;
 using Funbit.Ets.Telemetry.Server.Helpers;
 using Funbit.Ets.Telemetry.Server.Setup;
 using Microsoft.Owin.Hosting;
+using DSharpPlus;
+using DSharpPlus.Entities;
+using DSharpPlus.EventArgs;
 
 namespace Funbit.Ets.Telemetry.Server
 {
@@ -27,7 +32,7 @@ namespace Funbit.Ets.Telemetry.Server
             Utf8.GetBytes(ConfigurationManager.AppSettings["BroadcastUserId"] ?? ""));
         static readonly string BroadcastUserPassword = Convert.ToBase64String(
             Utf8.GetBytes(ConfigurationManager.AppSettings["BroadcastUserPassword"] ?? ""));
-        static readonly int BroadcastRateInSeconds = Math.Min(Math.Max(1, 
+        static readonly int BroadcastRateInSeconds = Math.Min(Math.Max(1,
             Convert.ToInt32(ConfigurationManager.AppSettings["BroadcastRate"])), 86400);
         static readonly bool UseTestTelemetryData = Convert.ToBoolean(
             ConfigurationManager.AppSettings["UseEts2TestTelemetryData"]);
@@ -105,9 +110,11 @@ namespace Funbit.Ets.Telemetry.Server
 
                 // show tray icon
                 trayIcon.Visible = true;
-                
+
                 // make sure that form is visible
                 Activate();
+
+                StartDiscordBot();
             }
             catch (Exception ex)
             {
@@ -115,11 +122,11 @@ namespace Funbit.Ets.Telemetry.Server
                 ex.ShowAsMessageBox(this, @"Network error", MessageBoxIcon.Exclamation);
             }
         }
-        
+
         void MainForm_Load(object sender, EventArgs e)
         {
             // log current version for debugging
-            Log.InfoFormat("Running application on {0} ({1}) {2}", Environment.OSVersion, 
+            Log.InfoFormat("Running application on {0} ({1}) {2}", Environment.OSVersion,
                 Environment.Is64BitOperatingSystem ? "64-bit" : "32-bit",
                 Program.UninstallMode ? "[UNINSTALL MODE]" : "");
             Text += @" " + AssemblyHelper.Version;
@@ -136,7 +143,7 @@ namespace Funbit.Ets.Telemetry.Server
             _server?.Dispose();
             trayIcon.Visible = false;
         }
-    
+
         void closeToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Close();
@@ -155,7 +162,7 @@ namespace Funbit.Ets.Telemetry.Server
                 {
                     statusLabel.Text = @"Connected to Ets2TestTelemetry.json";
                     statusLabel.ForeColor = Color.DarkGreen;
-                } 
+                }
                 else if (Ets2ProcessHelper.IsEts2Running && Ets2TelemetryDataReader.Instance.IsConnected)
                 {
                     statusLabel.Text = $"Connected to the simulator ({Ets2ProcessHelper.LastRunningGameName})";
@@ -189,7 +196,7 @@ namespace Funbit.Ets.Telemetry.Server
         {
             ProcessHelper.OpenUrl(((LinkLabel)sender).Text);
         }
-        
+
         void MainForm_Resize(object sender, EventArgs e)
         {
             ShowInTaskbar = WindowState != FormWindowState.Minimized;
@@ -202,7 +209,7 @@ namespace Funbit.Ets.Telemetry.Server
 
         void interfaceDropDown_SelectedIndexChanged(object sender, EventArgs e)
         {
-            var selectedInterface = (NetworkInterfaceInfo) interfacesDropDown.SelectedItem;
+            var selectedInterface = (NetworkInterfaceInfo)interfacesDropDown.SelectedItem;
             appUrlLabel.Text = IpToEndpointUrl(selectedInterface.Ip) + Ets2AppController.TelemetryAppUriPath;
             apiUrlLabel.Text = IpToEndpointUrl(selectedInterface.Ip) + Ets2TelemetryController.TelemetryApiUriPath;
             ipAddressLabel.Text = selectedInterface.Ip;
@@ -223,7 +230,7 @@ namespace Funbit.Ets.Telemetry.Server
             }
             broadcastTimer.Enabled = true;
         }
-        
+
         void uninstallToolStripMenuItem_Click(object sender, EventArgs e)
         {
             string exeFileName = Process.GetCurrentProcess().MainModule.FileName;
@@ -251,6 +258,22 @@ namespace Funbit.Ets.Telemetry.Server
         void aboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
             // TODO: implement later
+        }
+
+        async Task<int> StartDiscordBot()
+        {
+            DiscordConfiguration config = new DiscordConfiguration
+            {
+                Token = File.ReadAllText("./id.txt")
+            };
+            DiscordClient client = new DiscordClient(config);
+
+            await client.ConnectAsync();
+            await client.InitializeAsync();
+
+            client.message
+
+            return 0;
         }
     }
 }
