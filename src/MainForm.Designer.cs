@@ -42,9 +42,9 @@
             this.appUrlLabel = new System.Windows.Forms.LinkLabel();
             this.appUrlTitleLabel = new System.Windows.Forms.Label();
             this.apiUrlLabel = new System.Windows.Forms.LinkLabel();
-            this.statusLabel = new System.Windows.Forms.Label();
+            this.serverStatusLabel = new System.Windows.Forms.Label();
             this.apiEndpointUrlTitleLabel = new System.Windows.Forms.Label();
-            this.statusTitleLabel = new System.Windows.Forms.Label();
+            this.serverStatusTitleLabel = new System.Windows.Forms.Label();
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
             this.broadcastTimer = new System.Windows.Forms.Timer(this.components);
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
@@ -54,6 +54,8 @@
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.donateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.discordStatusTitleLabel = new System.Windows.Forms.Label();
+            this.discordStatusLabel = new System.Windows.Forms.Label();
             this.contextMenuStrip.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
@@ -89,6 +91,8 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.discordStatusLabel);
+            this.groupBox1.Controls.Add(this.discordStatusTitleLabel);
             this.groupBox1.Controls.Add(this.ipAddressLabel);
             this.groupBox1.Controls.Add(this.interfacesDropDown);
             this.groupBox1.Controls.Add(this.networkInterfaceTitleLabel);
@@ -96,9 +100,9 @@
             this.groupBox1.Controls.Add(this.appUrlLabel);
             this.groupBox1.Controls.Add(this.appUrlTitleLabel);
             this.groupBox1.Controls.Add(this.apiUrlLabel);
-            this.groupBox1.Controls.Add(this.statusLabel);
+            this.groupBox1.Controls.Add(this.serverStatusLabel);
             this.groupBox1.Controls.Add(this.apiEndpointUrlTitleLabel);
-            this.groupBox1.Controls.Add(this.statusTitleLabel);
+            this.groupBox1.Controls.Add(this.serverStatusTitleLabel);
             this.groupBox1.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.groupBox1.Location = new System.Drawing.Point(12, 33);
             this.groupBox1.Name = "groupBox1";
@@ -189,16 +193,16 @@
         "n)");
             this.apiUrlLabel.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.apiUrlLabel_LinkClicked);
             // 
-            // statusLabel
+            // serverStatusLabel
             // 
-            this.statusLabel.AutoSize = true;
-            this.statusLabel.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.statusLabel.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
-            this.statusLabel.Location = new System.Drawing.Point(141, 41);
-            this.statusLabel.Name = "statusLabel";
-            this.statusLabel.Size = new System.Drawing.Size(69, 17);
-            this.statusLabel.TabIndex = 13;
-            this.statusLabel.Text = "Checking...";
+            this.serverStatusLabel.AutoSize = true;
+            this.serverStatusLabel.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.serverStatusLabel.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.serverStatusLabel.Location = new System.Drawing.Point(141, 27);
+            this.serverStatusLabel.Name = "serverStatusLabel";
+            this.serverStatusLabel.Size = new System.Drawing.Size(69, 17);
+            this.serverStatusLabel.TabIndex = 13;
+            this.serverStatusLabel.Text = "Checking...";
             // 
             // apiEndpointUrlTitleLabel
             // 
@@ -210,15 +214,15 @@
             this.apiEndpointUrlTitleLabel.TabIndex = 12;
             this.apiEndpointUrlTitleLabel.Text = "Telemetry API URL:";
             // 
-            // statusTitleLabel
+            // serverStatusTitleLabel
             // 
-            this.statusTitleLabel.AutoSize = true;
-            this.statusTitleLabel.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.statusTitleLabel.Location = new System.Drawing.Point(92, 41);
-            this.statusTitleLabel.Name = "statusTitleLabel";
-            this.statusTitleLabel.Size = new System.Drawing.Size(46, 17);
-            this.statusTitleLabel.TabIndex = 11;
-            this.statusTitleLabel.Text = "Status:";
+            this.serverStatusTitleLabel.AutoSize = true;
+            this.serverStatusTitleLabel.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.serverStatusTitleLabel.Location = new System.Drawing.Point(29, 27);
+            this.serverStatusTitleLabel.Name = "serverStatusTitleLabel";
+            this.serverStatusTitleLabel.Size = new System.Drawing.Size(106, 17);
+            this.serverStatusTitleLabel.TabIndex = 11;
+            this.serverStatusTitleLabel.Text = "Telemetry Status:";
             // 
             // toolTip
             // 
@@ -255,7 +259,7 @@
             // uninstallToolStripMenuItem
             // 
             this.uninstallToolStripMenuItem.Name = "uninstallToolStripMenuItem";
-            this.uninstallToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.uninstallToolStripMenuItem.Size = new System.Drawing.Size(120, 22);
             this.uninstallToolStripMenuItem.Text = "Uninstall";
             this.uninstallToolStripMenuItem.Click += new System.EventHandler(this.uninstallToolStripMenuItem_Click);
             // 
@@ -272,24 +276,44 @@
             // helpToolStripMenuItem
             // 
             this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
-            this.helpToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.helpToolStripMenuItem.Size = new System.Drawing.Size(112, 22);
             this.helpToolStripMenuItem.Text = "Help";
             this.helpToolStripMenuItem.Click += new System.EventHandler(this.helpToolStripMenuItem_Click);
             // 
             // donateToolStripMenuItem
             // 
             this.donateToolStripMenuItem.Name = "donateToolStripMenuItem";
-            this.donateToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.donateToolStripMenuItem.Size = new System.Drawing.Size(112, 22);
             this.donateToolStripMenuItem.Text = "Donate";
             this.donateToolStripMenuItem.Click += new System.EventHandler(this.donateToolStripMenuItem_Click);
             // 
             // aboutToolStripMenuItem
             // 
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(112, 22);
             this.aboutToolStripMenuItem.Text = "About";
             this.aboutToolStripMenuItem.Visible = false;
             this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
+            // 
+            // discordStatusTitleLabel
+            // 
+            this.discordStatusTitleLabel.AutoSize = true;
+            this.discordStatusTitleLabel.Location = new System.Drawing.Point(40, 61);
+            this.discordStatusTitleLabel.Name = "discordStatusTitleLabel";
+            this.discordStatusTitleLabel.Size = new System.Drawing.Size(95, 17);
+            this.discordStatusTitleLabel.TabIndex = 22;
+            this.discordStatusTitleLabel.Text = "Discord Status:";
+            // 
+            // discordStatusLabel
+            // 
+            this.discordStatusLabel.AutoSize = true;
+            this.discordStatusLabel.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.discordStatusLabel.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.discordStatusLabel.Location = new System.Drawing.Point(141, 61);
+            this.discordStatusLabel.Name = "discordStatusLabel";
+            this.discordStatusLabel.Size = new System.Drawing.Size(69, 17);
+            this.discordStatusLabel.TabIndex = 23;
+            this.discordStatusLabel.Text = "Checking...";
             // 
             // MainForm
             // 
@@ -329,9 +353,9 @@
         private System.Windows.Forms.LinkLabel appUrlLabel;
         private System.Windows.Forms.Label appUrlTitleLabel;
         private System.Windows.Forms.LinkLabel apiUrlLabel;
-        private System.Windows.Forms.Label statusLabel;
+        private System.Windows.Forms.Label serverStatusLabel;
         private System.Windows.Forms.Label apiEndpointUrlTitleLabel;
-        private System.Windows.Forms.Label statusTitleLabel;
+        private System.Windows.Forms.Label serverStatusTitleLabel;
         private System.Windows.Forms.Label ipAddressLabel;
         private System.Windows.Forms.ComboBox interfacesDropDown;
         private System.Windows.Forms.Label networkInterfaceTitleLabel;
@@ -344,6 +368,8 @@
         private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem donateToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
+        private System.Windows.Forms.Label discordStatusLabel;
+        private System.Windows.Forms.Label discordStatusTitleLabel;
     }
 }
 
