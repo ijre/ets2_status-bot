@@ -1,4 +1,6 @@
 .vs
 *.user
 
-token.txt
+build
+obj
+id.txt
