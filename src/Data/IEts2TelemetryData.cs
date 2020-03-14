@@ -8,16 +8,11 @@ namespace Funbit.Ets.Telemetry.Server.Data
         /// Game information.
         /// </summary>
         IEts2Game Game { get; }
-        
+
         /// <summary>
         /// Truck information.
         /// </summary>
         IEts2Truck Truck { get; }
-
-        /// <summary>
-        /// Trailer information.
-        /// </summary>
-        IEts2Trailer Trailer { get; }
 
         /// <summary>
         /// Job information.
@@ -79,6 +74,10 @@ namespace Funbit.Ets.Telemetry.Server.Data
         /// Example: 3
         /// </summary>
         float TimeScale { get; }
+        /// <summary>
+        /// Returns all other variables within this interface as one long string, with newlines in between
+        /// </summary>
+        string Everything { get; }
     }
 
     public interface IEts2Vector
@@ -135,7 +134,7 @@ namespace Funbit.Ets.Telemetry.Server.Data
         /// Current truck speed in km/h.
         /// Example: 50.411231
         /// </summary>
-        float Speed { get; }
+        int Speed { get; }
 
         /// <summary>
         /// Represents vehicle space linear acceleration of 
@@ -147,7 +146,7 @@ namespace Funbit.Ets.Telemetry.Server.Data
         /// Current truck placement in the game world.
         /// </summary>
         IEts2Placement Placement { get; }
-        
+
         /// <summary>
         /// The value of the odometer in km.
         /// Example: 105809.25
@@ -157,7 +156,7 @@ namespace Funbit.Ets.Telemetry.Server.Data
         /// Speed selected for the cruise control in km/h.
         /// Example: 75
         /// </summary>
-        float CruiseControlSpeed { get; }
+        int CruiseControlSpeed { get; }
 
         /// <summary>
         /// Brand Id of the current truck. 
@@ -202,7 +201,7 @@ namespace Funbit.Ets.Telemetry.Server.Data
         /// Current RPM value of the truck's engine (rotates per minute).
         /// Example: 1372.3175
         /// </summary>
-        float EngineRpm { get; }
+        int EngineRpm { get; }
         /// <summary>
         /// Maximal RPM value of the truck's engine.
         /// Example: 2500
@@ -284,7 +283,7 @@ namespace Funbit.Ets.Telemetry.Server.Data
         /// Example: 0
         /// </summary>
         float GameClutch { get; }
-        
+
         /// <summary>
         /// Current level of the retarder brake.
         /// Ranges from 0 to RetarderStepCount.
@@ -307,7 +306,7 @@ namespace Funbit.Ets.Telemetry.Server.Data
         /// TODO: need to fix.
         /// </summary>
         //int ShifterToggle { get; }
-        
+
         /// <summary>
         /// Pressure in the brake air tank in psi.
         /// Example: 133.043961
@@ -353,7 +352,7 @@ namespace Funbit.Ets.Telemetry.Server.Data
         /// Example: 0
         /// </summary>
         float AdblueCapacity { get; }
-        
+
         /// <summary>
         /// Current level of truck's engine wear/damage between 0 (min) and 1 (max).
         /// Example: 0.00675457
@@ -551,6 +550,10 @@ namespace Funbit.Ets.Telemetry.Server.Data
         /// Example: 22
         /// </summary>
         float BatteryVoltageWarningValue { get; }
+        /// <summary>
+        /// Returns all other variables within this interface as one long string, with newlines in between
+        /// </summary>
+        string Everything { get; }
     }
 
     public interface IEts2Navigation
@@ -577,6 +580,33 @@ namespace Funbit.Ets.Telemetry.Server.Data
     public interface IEts2Job
     {
         /// <summary>
+        /// Id of the cargo for internal use by code.
+        /// Example: "derrick"
+        /// </summary>
+        string Id { get; }
+        /// <summary>
+        /// Localized name of the current trailer for display purposes.
+        /// Example: "Derrick"
+        /// </summary>
+        string Name { get; }
+        /// <summary>
+        /// Is the trailer attached to the truck or not.
+        /// </summary>
+        bool Attached { get; }
+        /// <summary>
+        /// Trailer mass in kilograms.
+        /// </summary>
+        float Mass { get; }
+        /// <summary>
+        /// Current trailer placement in the game world.
+        /// </summary>
+        IEts2Placement Placement { get; }
+        /// <summary>
+        /// Current level of trailer wear/damage between 0 (min) and 1 (max).
+        /// Example: 0.0314717
+        /// </summary>
+        float Wear { get; }
+        /// <summary>
         /// Reward in internal game-specific currency.
         /// Example: 2316
         /// </summary>
@@ -593,7 +623,17 @@ namespace Funbit.Ets.Telemetry.Server.Data
         /// Example: "0001-01-01T07:06:00Z"
         /// </summary>
         DateTime RemainingTime { get; }
-        
+        /// <summary>
+        /// Relative estimated time of arrival.
+        /// Example: "0001-01-01T02:05:00Z"
+        /// </summary>
+        DateTime EstimatedTime { get; }
+
+        /// <summary>
+        /// Estimated distance to the destination in meters.
+        /// Example: 1224
+        /// </summary>
+        int EstimatedDistance { get; }
         /// <summary>
         /// Localized name of the source city for display purposes.
         /// Example: "Linz"
@@ -614,38 +654,10 @@ namespace Funbit.Ets.Telemetry.Server.Data
         /// Example: "JCB"
         /// </summary>
         string DestinationCompany { get; }
-    }
-
-    public interface IEts2Trailer
-    {
         /// <summary>
-        /// Id of the cargo for internal use by code.
-        /// Example: "derrick"
+        /// Returns all other variables within this interface as one long string, with newlines in between
         /// </summary>
-        string Id { get; }
-        /// <summary>
-        /// Localized name of the current trailer for display purposes.
-        /// Example: "Derrick"
-        /// </summary>
-        string Name { get; }
-        /// <summary>
-        /// Is the trailer attached to the truck or not.
-        /// </summary>
-        bool Attached { get; }
-        /// <summary>
-        /// Mass of the cargo in kilograms.
-        /// Example: 22000
-        /// </summary>
-        float Mass { get; }
-        /// <summary>
-        /// Current trailer placement in the game world.
-        /// </summary>
-        IEts2Placement Placement { get; }
-        /// <summary>
-        /// Current level of trailer wear/damage between 0 (min) and 1 (max).
-        /// Example: 0.0314717
-        /// </summary>
-        float Wear { get; }
+        string Everything { get; }
     }
 
     /*

@@ -160,23 +160,23 @@ namespace Funbit.Ets.Telemetry.Server
             {
                 if (UseTestTelemetryData)
                 {
-                    statusLabel.Text = @"Connected to Ets2TestTelemetry.json";
-                    statusLabel.ForeColor = Color.DarkGreen;
+                    serverStatusLabel.Text = @"Connected to Ets2TestTelemetry.json";
+                    serverStatusLabel.ForeColor = Color.DarkGreen;
                 }
                 else if (Ets2ProcessHelper.IsEts2Running && Ets2TelemetryDataReader.Instance.IsConnected)
                 {
-                    statusLabel.Text = $"Connected to the simulator ({Ets2ProcessHelper.LastRunningGameName})";
-                    statusLabel.ForeColor = Color.DarkGreen;
+                    serverStatusLabel.Text = $"Connected to the simulator ({Ets2ProcessHelper.LastRunningGameName})";
+                    serverStatusLabel.ForeColor = Color.DarkGreen;
                 }
                 else if (Ets2ProcessHelper.IsEts2Running)
                 {
-                    statusLabel.Text = $"Simulator is running ({Ets2ProcessHelper.LastRunningGameName})";
-                    statusLabel.ForeColor = Color.Teal;
+                    serverStatusLabel.Text = $"Simulator is running ({Ets2ProcessHelper.LastRunningGameName})";
+                    serverStatusLabel.ForeColor = Color.Teal;
                 }
                 else
                 {
-                    statusLabel.Text = @"Simulator is not running";
-                    statusLabel.ForeColor = Color.FromArgb(240, 55, 30);
+                    serverStatusLabel.Text = @"Simulator is not running";
+                    serverStatusLabel.ForeColor = Color.FromArgb(240, 55, 30);
                 }
             }
             catch (Exception ex)
@@ -260,20 +260,111 @@ namespace Funbit.Ets.Telemetry.Server
             // TODO: implement later
         }
 
+        #region Discord
         async Task<int> StartDiscordBot()
         {
-            DiscordConfiguration config = new DiscordConfiguration
+            try
             {
-                Token = File.ReadAllText("./id.txt")
-            };
-            DiscordClient client = new DiscordClient(config);
+                DiscordClient client = new DiscordClient(new DiscordConfiguration
+                {
+                    Token = File.ReadAllText("./id.txt")
+                });
 
-            await client.ConnectAsync();
-            await client.InitializeAsync();
+                await client.ConnectAsync();
+                await client.InitializeAsync();
 
-            client.message
+                client.MessageCreated += Client_MessageCreated;
+
+                client.Ready += (ReadyEventArgs args) =>
+                {
+                    discordStatusLabel.Text = "Connected!";
+                    discordStatusLabel.ForeColor = Color.DarkGreen;
+                    return Task.CompletedTask;
+                };
+            }
+            catch (FileNotFoundException)
+            {
+                if (File.Exists("../id.txt"))
+                    File.Copy("../id.txt", "./id.txt");
+                else
+                {
+                    var box = MessageBox.Show("Bot token (id.txt) not found. If it exists, would you like to input the path to the file?", "Token not found", MessageBoxButtons.YesNo, MessageBoxIcon.Error);
+
+                    if (box == DialogResult.Yes)
+                    {
+                        using (OpenFileDialog diag = new OpenFileDialog())
+                        {
+                            diag.ShowDialog();
+                            File.Copy(diag.FileName, "./id.txt");
+                        };
+                    }
+                    else
+                    {
+                        Application.Exit();
+                        return 1;
+                    }
+                }
+
+                Process.Start(Application.ExecutablePath, "-restart");
+                Application.Exit();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex);
+                ex.ShowAsMessageBox(this, @"Discord Error");
+            }
 
             return 0;
         }
+
+        private readonly String[] categories = new String[3] { "game", "truck", "job" };
+
+        async Task<int> Client_MessageCreated(MessageCreateEventArgs e)
+        {
+            var message = e.Message;
+
+            try
+            {
+                if (message.Content.IndexOf("?") == 0 && message.Content != "?" && !message.Author.IsBot)
+                    if (message.Content == "?commands")
+                        await message.Channel.SendMessageAsync(
+                            "If you want multiple categories at once, just put a space inbetween the words.\n\n" +
+                            "Game (tells you:\nIf their game is launched,\nIf they're paused,\nTheir SDK version + their SDK plugin version\nPlus a few other misc items.),\n\n" +
+                            "Truck (tells you: \nMake and model,\nTheir speed in KPH, \ntransmission stats, and much, much more.),\n\n" +
+                            "Job (tells you: \nHow much the contract is worth,\nThe deadline,\nHow much time is left until the deadline,\nThe city + company the contract came from,\nThe city + company the contract goes to,\nThe cargo's damage, contents, weight, and whether or not it's attached.)");
+                    else
+                    {
+                        string[] split = message.Content.Split(' ');
+                        for (int i = 0; i < 3; i++)
+                            for (int i2 = 0; i2 < split.Length; i2++)
+                                if (split[i2] == categories[i] || split[i2].Substring(1) == categories[i])
+                                {
+                                    if (split[i2].IndexOf("?") == 0)
+                                        split[i2] = split[i2].Substring(1);
+
+                                    switch (split[i2])
+                                    {
+                                        case "game":
+                                            await message.Channel.SendMessageAsync(Ets2TelemetryDataReader.Instance.Read().Game.Everything);
+                                            break;
+                                        case "truck":
+                                            await message.Channel.SendMessageAsync(Ets2TelemetryDataReader.Instance.Read().Truck.Everything);
+                                            break;
+                                        case "job":
+                                            await message.Channel.SendMessageAsync(Ets2TelemetryDataReader.Instance.Read().Job.Everything);
+                                            break;
+                                    }
+                                }
+                    }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex);
+                await message.Channel.SendMessageAsync("Error: " + ex.Message);
+            }
+
+            return 0;
+        }
+        #endregion
     }
 }

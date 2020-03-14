@@ -8,7 +8,7 @@ namespace Funbit.Ets.Telemetry.Server.Data
     class Ets2TelemetryData : IEts2TelemetryData
     {
         Box<Ets2TelemetryStructure> _rawData;
-        
+
         public void Update(Ets2TelemetryStructure rawData)
         {
             _rawData = new Box<Ets2TelemetryStructure>(rawData);
@@ -34,7 +34,6 @@ namespace Funbit.Ets.Telemetry.Server.Data
 
         public IEts2Game Game => new Ets2Game(_rawData);
         public IEts2Truck Truck => new Ets2Truck(_rawData);
-        public IEts2Trailer Trailer => new Ets2Trailer(_rawData);
         public IEts2Job Job => new Ets2Job(_rawData);
         public IEts2Navigation Navigation => new Ets2Navigation(_rawData);
     }
@@ -59,6 +58,11 @@ namespace Funbit.Ets.Telemetry.Server.Data
         public DateTime NextRestStopTime => Ets2TelemetryData.MinutesToDate(_rawData.Struct.nextRestStop);
         public string Version => $"{_rawData.Struct.ets2_version_major}.{_rawData.Struct.ets2_version_minor}";
         public string TelemetryPluginVersion => _rawData.Struct.ets2_telemetry_plugin_revision.ToString();
+
+        public string Everything =>
+            $"Stats for game:\nGame: {GameName}\nPaused: {Paused}\nTime: {Time.ToString()}\n" +
+            $"Next Rest Stop Time: {NextRestStopTime}\nTime Scale: {TimeScale}\nGame Version: {Version}\nTelemetry Version: {TelemetryPluginVersion}" +
+            $"{(TimeScale == 0 ? "\n\n(Game is " + (Connected ? "closed)" : "starting up)") : "")}";
     }
 
     class Ets2Vector : IEts2Vector
@@ -112,12 +116,12 @@ namespace Funbit.Ets.Telemetry.Server.Data
         /// <summary>
         /// Truck speed in km/h.
         /// </summary>
-        public float Speed => _rawData.Struct.speed * 3.6f;
+        public int Speed => (int)(_rawData.Struct.speed * 3.6f);
 
         /// <summary>
         /// Cruise control speed in km/h.
         /// </summary>
-        public float CruiseControlSpeed => _rawData.Struct.cruiseControlSpeed * 3.6f;
+        public int CruiseControlSpeed => (int)(_rawData.Struct.cruiseControlSpeed * 3.6f);
 
         public bool CruiseControlOn => _rawData.Struct.cruiseControl != 0;
         public float Odometer => _rawData.Struct.truckOdometer;
@@ -126,7 +130,7 @@ namespace Funbit.Ets.Telemetry.Server.Data
         public int ForwardGears => _rawData.Struct.gearsForward;
         public int ReverseGears => _rawData.Struct.gearsReverse;
         public string ShifterType => Ets2TelemetryData.BytesToString(_rawData.Struct.shifterType);
-        public float EngineRpm => _rawData.Struct.engineRpm;
+        public int EngineRpm => (int)_rawData.Struct.engineRpm;
         public float EngineRpmMax => _rawData.Struct.engineRpmMax;
         public float Fuel => _rawData.Struct.fuel;
         public float FuelCapacity => _rawData.Struct.fuelCapacity;
@@ -246,46 +250,31 @@ namespace Funbit.Ets.Telemetry.Server.Data
             }
         }
         */
-    }
 
-    class Ets2Trailer : IEts2Trailer
-    {
-        readonly Box<Ets2TelemetryStructure> _rawData;
+        public string Everything =>
+            $"Stats for truck:\nName: {Make} {Model}\nOdometer: {Odometer}\n\n" +
+            $"Speed: {Speed} KMH\n" +
+            (Speed == 0 ? $"Parking Brake Engaged: {ParkBrakeOn}\n" : $"RPM: {EngineRpm}/{EngineRpmMax}\n") +
+            (CruiseControlOn ? $"Cruise Control Speed: {int.Parse(CruiseControlSpeed.ToString())}\n" : "") +
+            $"Gear: {(DisplayedGear == 0 ? "N" : DisplayedGear.ToString())}/{ForwardGears + ReverseGears} ({ForwardGears}/{ReverseGears})\nShift Type: {ShifterType}\n" +
+            $"Fuel: {Fuel}/{FuelCapacity}\n\n" +
 
-        public Ets2Trailer(Box<Ets2TelemetryStructure> rawData)
-        {
-            _rawData = rawData;
-        }
+            $"Damages:\nCabin: {WearCabin}\nChassis: {WearChassis}\nEngine: {WearEngine}\nTransmission: {WearTransmission}\nWheels: {WearWheels}\n\n" +
 
-        public bool Attached => _rawData.Struct.trailer_attached != 0;
-        public string Id => Ets2TelemetryData.BytesToString(_rawData.Struct.trailerId);
-        public string Name => Ets2TelemetryData.BytesToString(_rawData.Struct.trailerName);
-
-        /// <summary>
-        /// Trailer mass in kilograms.
-        /// </summary>
-        public float Mass => _rawData.Struct.trailerMass;
-
-        public float Wear => _rawData.Struct.wearTrailer;
-
-        public IEts2Placement Placement => new Ets2Placement(
-            _rawData.Struct.trailerCoordinateX,
-            _rawData.Struct.trailerCoordinateY,
-            _rawData.Struct.trailerCoordinateZ,
-            _rawData.Struct.trailerRotationX,
-            _rawData.Struct.trailerRotationY,
-            _rawData.Struct.trailerRotationZ);
+            $"Lights: " + (LightsBeamHighOn ? "On (High Beams)" : LightsBeamLowOn ? "On" : "Off") + "\n\n" +
+            (BlinkerLeftOn ? "**Turning Left**" : "") +
+            (BlinkerRightOn ? "**Turning Right**" : "");
     }
 
     class Ets2Navigation : IEts2Navigation
     {
         readonly Box<Ets2TelemetryStructure> _rawData;
-        
+
         public Ets2Navigation(Box<Ets2TelemetryStructure> rawData)
         {
             _rawData = rawData;
         }
-        
+
         public DateTime EstimatedTime => Ets2TelemetryData.SecondsToDate((int)_rawData.Struct.navigationTime);
         public int EstimatedDistance => (int)_rawData.Struct.navigationDistance;
         public int SpeedLimit => _rawData.Struct.navigationSpeedLimit > 0 ? (int)Math.Round(_rawData.Struct.navigationSpeedLimit * 3.6f) : 0;
@@ -300,9 +289,24 @@ namespace Funbit.Ets.Telemetry.Server.Data
             _rawData = rawData;
         }
 
+        public bool Attached => _rawData.Struct.trailer_attached != 0;
+        public string Id => Ets2TelemetryData.BytesToString(_rawData.Struct.trailerId);
+        public string Name => Ets2TelemetryData.BytesToString(_rawData.Struct.trailerName);
+        public float Mass => _rawData.Struct.trailerMass;
+
+        public float Wear => _rawData.Struct.wearTrailer;
+
+        public IEts2Placement Placement => new Ets2Placement(
+            _rawData.Struct.trailerCoordinateX,
+            _rawData.Struct.trailerCoordinateY,
+            _rawData.Struct.trailerCoordinateZ,
+            _rawData.Struct.trailerRotationX,
+            _rawData.Struct.trailerRotationY,
+            _rawData.Struct.trailerRotationZ);
+
         public int Income => _rawData.Struct.jobIncome;
         public DateTime DeadlineTime => Ets2TelemetryData.MinutesToDate(_rawData.Struct.jobDeadline);
-        public DateTime RemainingTime 
+        public DateTime RemainingTime
         {
             get
             {
@@ -311,11 +315,18 @@ namespace Funbit.Ets.Telemetry.Server.Data
                 return Ets2TelemetryData.MinutesToDate(0);
             }
         }
+        public DateTime EstimatedTime => Ets2TelemetryData.SecondsToDate((int)_rawData.Struct.navigationTime);
+        public int EstimatedDistance => (int)_rawData.Struct.navigationDistance;
 
         public string SourceCity => Ets2TelemetryData.BytesToString(_rawData.Struct.jobCitySource);
         public string SourceCompany => Ets2TelemetryData.BytesToString(_rawData.Struct.jobCompanySource);
         public string DestinationCity => Ets2TelemetryData.BytesToString(_rawData.Struct.jobCityDestination);
         public string DestinationCompany => Ets2TelemetryData.BytesToString(_rawData.Struct.jobCompanyDestination);
+
+        public string Everything =>
+            $"Stats for job:\nDelivering {Name} (Internal Name: {Id}) from {SourceCity} ({SourceCompany}) to {DestinationCity} ({DestinationCompany})\nPay: {Income}\n\n" +
+            $"Estimated Arrival: {EstimatedTime.Hour}:{EstimatedTime.Minute}:{EstimatedTime.Second}\nTime Left: {EstimatedTime.Hour}:{EstimatedTime.Minute}:{EstimatedTime.Second}\n\n" +
+            $"Trailer:\nAttached: {Attached}\nWeight: {Mass}KG\nDamage: {Wear}";
     }
 
     /*
@@ -357,7 +368,7 @@ namespace Funbit.Ets.Telemetry.Server.Data
     }
     */
 
-    class Box<T> where T : struct 
+    class Box<T> where T : struct
     {
         public T Struct { get; set; }
 
