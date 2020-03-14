@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
@@ -28,7 +29,7 @@ namespace Funbit.Ets.Telemetry.Server
                     ? "Ets2Telemetry_8F63CCBE353DE22BD1A86308AD675001_UAC"
                     : "Ets2Telemetry_8F63CCBE353DE22BD1A86308AD675001");
             bool bAnotherInstanceRunning = GetLastError() == ErrorAlreadyExists;
-            if (bAnotherInstanceRunning)
+            if (bAnotherInstanceRunning && !args.Any(a => a.Trim() == "-restart"))
             {
                 MessageBox.Show(@"Another ETS2/ATS Telemetry Server instance is already running!", @"Warning",
                     MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
